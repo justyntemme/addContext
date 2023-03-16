@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -84,27 +85,30 @@ func addContext(c *cobra.Command, args []string) {
 
 	client := gpt3.NewClient(apiKey)
 	// Split text into multiple prompts
-	var prompts []string
-	code := string(" `") + string(text) + string("` \n")
-	prompts = append(prompts, code+question)
-
-	// Call the OpenAI API to generate a completion for each prompt
-	var responses []gpt3.CompletionResponse
-	for _, prompt := range prompts {
-		resp, err := client.Completion(ctx, gpt3.CompletionRequest{
-			Prompt: []string{prompt},
-		})
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		responses = append(responses, *resp)
+	var responses []gpt3.ChatCompletionResponse
+	chatResp, err := client.ChatCompletion(ctx, gpt3.ChatCompletionRequest{
+		Model: gpt3.GPT3Dot5Turbo,
+		Messages: []gpt3.ChatCompletionRequestMessage{
+			{
+				Role:    "system",
+				Content: "You are a teacher taking questions from students about their code, this is the given code `" + string(text) + string("`"),
+			},
+			{
+				Role:    "user",
+				Content: question,
+			},
+		},
+	})
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
+	log.Printf("%+v\n", chatResp)
 
 	// Combine the responses into a single string
 	var output strings.Builder
 	for _, resp := range responses {
-		output.WriteString(resp.Choices[0].Text)
+		output.WriteString(resp.Choices[0].Message.Content)
 	}
 
 	fmt.Print(output.String())
