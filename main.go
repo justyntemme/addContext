@@ -83,17 +83,38 @@ func addContext(c *cobra.Command, args []string) {
 	ctx := context.Background()
 
 	client := gpt3.NewClient(apiKey)
-
-	// call the OpenAI API to determine the likelihood that the text was written by an AI
-
-	resp, err := client.Completion(ctx, gpt3.CompletionRequest{
-		Prompt: []string{"I'm going to give you the entire contents of a github repository, then ask you a question at the end. Only reply with the answer to my question given the added context of the repository code. " + string(text) + " Here is my question: " + question},
-	})
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	// Split text into multiple prompts
+	var prompts []string
+	prompts = append(prompts, "I'm going to give you the entire contents of a github repository, then ask you a question at the end. Only reply with the answer to my question given the added context of the repository code.\n")
+	for i := 0; i < len(text); i += 4096 {
+		if i+4096 < len(text) {
+			prompts = append(prompts, string(text[i:i+4096])+"\n")
+		} else {
+			prompts = append(prompts, string(text[i:])+"\n")
+		}
 	}
-	fmt.Print(resp.Choices[0].Text)
+	prompts = append(prompts, "Here is my question: "+question, ": The answer is ")
+
+	// Call the OpenAI API to generate a completion for each prompt
+	var responses []gpt3.CompletionResponse
+	for _, prompt := range prompts {
+		resp, err := client.Completion(ctx, gpt3.CompletionRequest{
+			Prompt: []string{prompt},
+		})
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		responses = append(responses, *resp)
+	}
+
+	// Combine the responses into a single string
+	var output strings.Builder
+	for _, resp := range responses {
+		output.WriteString(resp.Choices[0].Text)
+	}
+
+	fmt.Print(output.String())
 	defer os.RemoveAll(tempDir)
 }
 
