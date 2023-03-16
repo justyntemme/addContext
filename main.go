@@ -85,15 +85,8 @@ func addContext(c *cobra.Command, args []string) {
 	client := gpt3.NewClient(apiKey)
 	// Split text into multiple prompts
 	var prompts []string
-	prompts = append(prompts, "I'm going to give you the entire contents of a github repository, then ask you a question at the end. Only reply with the answer to my question given the added context of the repository code.\n")
-	for i := 0; i < len(text); i += 4096 {
-		if i+4096 < len(text) {
-			prompts = append(prompts, string(text[i:i+4096])+"\n")
-		} else {
-			prompts = append(prompts, string(text[i:])+"\n")
-		}
-	}
-	prompts = append(prompts, "Here is my question: "+question, ": The answer is ")
+	code := string(" `") + string(text) + string("` \n")
+	prompts = append(prompts, code+question)
 
 	// Call the OpenAI API to generate a completion for each prompt
 	var responses []gpt3.CompletionResponse
