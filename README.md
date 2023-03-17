@@ -19,8 +19,8 @@ This is a Go program that adds context to questions for the GPT-3 API via GitHub
 To use this program, you will need to have a GPT-3 API key from OpenAI. Once you have your key, follow these steps:
 
 1. Clone this repository to your local machine.
-2. Inside the cloned directory, run `go mod download` to download the required dependencies.
-3. Run `go build addContext.go` to build the program.
+2. Inside the cloned directory, run `go mod tidy` to download the required dependencies.
+3. Run `go build main.go` to build the program.
 4. Run the program with the following flags:
 
   - `-u` or `--url`: The GitHub repository URL to clone.
