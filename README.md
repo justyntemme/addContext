@@ -3,8 +3,7 @@ GitHub Repository: Adding Context to Questions for GPT-3 API via GitHub Reposito
 
 ## What is this?
 
-This is a Go program that adds context to questions for the GPT-3 API via GitHub repositories. It allows a teacher to evaluate student code and ask
-any questions about it.
+This is a Go program that adds context to questions for the GPT-3 API via GitHub repositories. 
 
 ## How does it work?
 
