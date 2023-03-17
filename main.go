@@ -87,7 +87,7 @@ func addContext(c *cobra.Command, args []string) {
 	// Split text into multiple prompts
 	var responses []gpt3.ChatCompletionResponse
 	chatResp, err := client.ChatCompletion(ctx, gpt3.ChatCompletionRequest{
-		Model: gpt3.GPT3Dot5Turbo,
+		Model: gpt3.GPT3Dot5Turbo0301,
 		Messages: []gpt3.ChatCompletionRequestMessage{
 			{
 				Role:    "system",
