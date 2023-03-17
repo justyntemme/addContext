@@ -55,9 +55,8 @@ func main() {
 	}
 
 }
+func getApiKey(c *cobra.Command) string {
 
-func addContext(c *cobra.Command, args []string) {
-	// get the API key from the command parameter or the environment variable
 	apiKey, _ := c.Flags().GetString("key")
 	if apiKey == "" {
 		apiKey = os.Getenv("API_KEY")
@@ -65,8 +64,15 @@ func addContext(c *cobra.Command, args []string) {
 			fmt.Println("API key not set")
 			os.Exit(1)
 		}
+
 	}
 
+	return apiKey
+}
+
+func addContext(c *cobra.Command, args []string) {
+	// get the API key from the command parameter or the environment variable
+	apiKey := getApiKey(c)
 	// get the text argument from the command
 	url, err := c.Flags().GetString("url")
 	tempDir, err := cloneRepo(url)
@@ -85,6 +91,16 @@ func addContext(c *cobra.Command, args []string) {
 
 	client := gpt3.NewClient(apiKey)
 	// Split text into multiple prompts
+	req := gpt3.EmbeddingsRequest{
+		Model: gpt3.TextEmbeddingAda002,
+		Input: []string{string(text)}}
+	resp, err := client.Embeddings(ctx, req)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(resp.Object)
+	fmt.Println(resp.Data[0].Embedding)
 	var responses []gpt3.ChatCompletionResponse
 	chatResp, err := client.ChatCompletion(ctx, gpt3.ChatCompletionRequest{
 		Model: gpt3.GPT3Dot5Turbo0301,
